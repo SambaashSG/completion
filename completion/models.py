@@ -4,6 +4,7 @@ Completion tracking and aggregation models.
 
 import logging
 import traceback
+import json
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
@@ -97,14 +98,17 @@ class BlockCompletionManager(models.Manager):
 
         if waffle.ENABLE_COMPLETION_TRACKING_SWITCH.is_enabled():
             log.warning("block_key : %s , completion %s ", block_key, completion)
-            completion = 0.0
-
             try:
                 module = StudentModule.objects.filter(
                     student_id=user.id,
                      module_state_key =block_key
                 )
-                log.info( " completion module %s", module)
+                state = json.loads(module.state)
+                if module.module_type == 'video_jwplayer':
+                    completion = state['completion']
+                elif module.module_type == 'freetextresponse':
+                    completion = state['score']
+                log.info( " completion module %s", completion)
             except Exception as e:
                 log.error(traceback.format_exc())
 
