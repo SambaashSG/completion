@@ -97,6 +97,8 @@ class BlockCompletionManager(models.Manager):
             )
 
         if waffle.ENABLE_COMPLETION_TRACKING_SWITCH.is_enabled():
+            log.warning("block_key : %s , completion %s ",block_key, completion)
+            completion = 0.0
             try:
                 with transaction.atomic():
                     obj, is_new = self.get_or_create(  # pylint: disable=unpacking-non-sequence
