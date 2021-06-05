@@ -103,11 +103,11 @@ class BlockCompletionManager(models.Manager):
                     student_id=user.id,
                      module_state_key =block_key
                 )
-                state = json.loads(module.state)
+
                 if module.module_type == 'video_jwplayer':
-                    completion = state['completion']
+                    completion = module.state['completion']
                 elif module.module_type == 'freetextresponse':
-                    completion = state['score']
+                    completion = module.state['score']
                 log.info( " completion module %s", completion)
             except Exception as e:
                 log.error(traceback.format_exc())
