@@ -102,9 +102,9 @@ class BlockCompletionManager(models.Manager):
                 modules = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
                 if modules:
                     if modules[0].module_type == 'video_jwplayer':
-                        completion = json.loads(modules[0].state)['completion']
+                        completion = json.dumps(json.loads(modules[0].state)['completion'])
                     elif modules[0].module_type == 'freetextresponse':
-                        completion = json.loads(modules[0].state)['score']
+                        completion = json.dumps(json.loads(modules[0].state)['score'])
                 else:
                     completion = 0.0
 
