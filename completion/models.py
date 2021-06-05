@@ -3,7 +3,7 @@ Completion tracking and aggregation models.
 """
 
 import logging
-
+import traceback
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from model_utils.models import TimeStampedModel
 
 from opaque_keys.edx.django.models import LearningContextKeyField, UsageKeyField
-
+from lms.djangoapps.courseware.models import StudentModule
 from . import waffle
 
 log = logging.getLogger(__name__)
@@ -98,6 +98,16 @@ class BlockCompletionManager(models.Manager):
         if waffle.ENABLE_COMPLETION_TRACKING_SWITCH.is_enabled():
             log.warning("block_key : %s , completion %s ", block_key, completion)
             completion = 0.0
+
+            try:
+                module = StudentModule.objects.filter(
+                    student_id=user.id,
+                     module_state_key =block_key
+                )
+                log.info( " completion module %s", module)
+            except Exception as e:
+                log.error(traceback.format_exc())
+
             try:
                 with transaction.atomic():
                     obj, is_new = self.get_or_create(  # pylint: disable=unpacking-non-sequence
