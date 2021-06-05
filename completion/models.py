@@ -99,15 +99,14 @@ class BlockCompletionManager(models.Manager):
         if waffle.ENABLE_COMPLETION_TRACKING_SWITCH.is_enabled():
             log.warning("block_key : %s , completion %s ", block_key, completion)
             try:
-                module = StudentModule.objects.filter(
+                (module_type,state)  = StudentModule.objects.filter(
                     student_id=user.id,
-                     module_state_key =block_key
-                )
-
-                if module.module_type == 'video_jwplayer':
-                    completion = module.state['completion']
-                elif module.module_type == 'freetextresponse':
-                    completion = module.state['score']
+                    module_state_key =block_key
+                ).value_list('module_type','state')
+                if module_type == 'video_jwplayer':
+                    completion = state['completion']
+                elif module_type == 'freetextresponse':
+                    completion = state['score']
                 log.info( " completion module %s", completion)
             except Exception as e:
                 log.error(traceback.format_exc())
