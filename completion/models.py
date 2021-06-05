@@ -100,11 +100,12 @@ class BlockCompletionManager(models.Manager):
             log.warning("block_key : %s , completion %s ", block_key, completion)
             try:
                 modules = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
+                log.warning("modules %s ", modules)
                 if modules:
-                    if modules[0].module_type == 'video_jwplayer':
-                        completion = json.dumps(json.loads(modules[0].state)['completion'])
-                    elif modules[0].module_type == 'freetextresponse':
-                        completion = json.dumps(json.loads(modules[0].state)['score'])
+                    if modules[0].state['completion']:
+                        completion = modules[0].state['completion']
+                    elif modules[0].state['score']:
+                        completion = modules[0].state['score']
                 else:
                     completion = 0.0
 
