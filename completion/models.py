@@ -105,6 +105,8 @@ class BlockCompletionManager(models.Manager):
                         completion = json.loads(modules[0].state)['completion']
                     elif modules[0].module_type == 'freetextresponse':
                         completion = json.loads(modules[0].state)['score']
+                else:
+                    completion = 0.0
 
                 log.info(" completion module %s", completion)
 
