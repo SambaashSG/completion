@@ -97,19 +97,25 @@ class BlockCompletionManager(models.Manager):
             )
 
         if waffle.ENABLE_COMPLETION_TRACKING_SWITCH.is_enabled():
-            log.warning("block_key : %s , completion %s ", block_key, completion)
+            log.error("----------------block_key : %s , completion %s, student id %s ", block_key, completion, user.id)
             try:
-                modules = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
-                log.warning("modules %s ", modules)
-                if modules:
-                    if modules[0].state['completion']:
-                        completion = modules[0].state['completion']
-                    elif modules[0].state['score']:
-                        completion = modules[0].state['score']
+                #Django QuerySet
+                qs = StudentModule.objects.filter(student_id=user.id, module_state_key="block-v1:sambaash+text01+2021_06+type@video_jwplayer+block@d153b6f2b1fa479caf90f2c0e820a491").values_list('state', 'module_type')
+                log.error("----------------qs %s", qs)
+                if not qs:
+                    completion = 0
                 else:
-                    completion = 0.0
+                    state_values = [item for item in qs][0]#This is a Tuple
+                    log.error("----------------------state_values %s ", state_values)
+                    if len(state_values) > 0:
+                        log.error("----------------------completion %s ", json.loads(state_values[0])['completion'])
+                        if state_values[1] == 'video_jwplayer': #state
+                            completion = json.loads(state_values[0])['completion']
+                        elif state_values[1] == 'freetextresponse':
+                            completion = json.loads(state_values[0])['score']
+                        log.info("----------------- completion module %s", completion)
 
-                log.info(" completion module %s", completion)
+
 
             except Exception as e:
                 log.error(traceback.format_exc())
