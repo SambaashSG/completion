@@ -100,11 +100,18 @@ class BlockCompletionManager(models.Manager):
             log.error("----------------block_key : %s , completion %s, student id %s ", block_key, completion, user.id)
             try:
                 #Django QuerySet
+                if "freetextresponse" in block_key:
+                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key,module_type='freetextresponse')
+                    log.error("----------------qs %s", qs)
+                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key,module_type='freetextresponse').values_list('state','module_type')
+                    log.error("----------------qs %s", qs)
 
-                qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
-                log.error("----------------qs %s", qs)
-                qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key).values_list('state', 'module_type')
-                log.error("----------------qs %s", qs)
+                if "video"  in block_key:
+                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key, module_type='video_jwplayer')
+                    log.error("----------------qs %s", qs)
+                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key, module_type='video_jwplayer').values_list('state','module_type')
+                    log.error("----------------qs %s", qs)
+
                 if not qs:
                     completion = 0
                 else:
