@@ -5,6 +5,7 @@ Completion tracking and aggregation models.
 import logging
 import traceback
 import json
+import time
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
@@ -100,17 +101,10 @@ class BlockCompletionManager(models.Manager):
             log.error("----------------block_key : %s , completion %s, student id %s ", block_key, completion, user.id)
             try:
                 #Django QuerySet
-                if "freetextresponse" in block_key:
-                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key,module_type='freetextresponse')
-                    log.error("----------------qs %s", qs)
-                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key,module_type='freetextresponse').values_list('state','module_type')
-                    log.error("----------------qs %s", qs)
-
-                if "video"  in block_key:
-                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key, module_type='video_jwplayer')
-                    log.error("----------------qs %s", qs)
-                    qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key, module_type='video_jwplayer').values_list('state','module_type')
-                    log.error("----------------qs %s", qs)
+                qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
+                log.error("----------------qs %s", qs)
+                qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key).values_list('state','module_type')
+                log.error("----------------qs %s", qs)
 
                 if not qs:
                     completion = 0
@@ -118,12 +112,16 @@ class BlockCompletionManager(models.Manager):
                     state_values = [item for item in qs][0]#This is a Tuple
                     log.error("----------------------state_values %s ", state_values)
                     if len(state_values) > 0:
-                        log.error("----------------------completion %s ", json.loads(state_values[0])['completion'])
                         if state_values[1] == 'video_jwplayer': #state
                             completion = json.loads(state_values[0])['completion']
+                            log.error("----------------------completion %s ", completion)
                         elif state_values[1] == 'freetextresponse':
-                            completion = json.loads(state_values[0])['score']
-                        log.info("----------------- completion module %s", completion)
+                            try:
+                                completion = json.loads(state_values[0])['score']
+                                log.info("----------------- score  %s", completion)
+                            except Exception as e:
+                                log.error("No score because state is None")
+                                completion = 0
 
 
 
