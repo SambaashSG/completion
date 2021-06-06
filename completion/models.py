@@ -100,6 +100,9 @@ class BlockCompletionManager(models.Manager):
             log.error("----------------block_key : %s , completion %s, student id %s ", block_key, completion, user.id)
             try:
                 #Django QuerySet
+
+                qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key)
+                log.error("----------------qs %s", qs)
                 qs = StudentModule.objects.filter(student_id=user.id, module_state_key=block_key).values_list('state', 'module_type')
                 log.error("----------------qs %s", qs)
                 if not qs:
